@@ -1,6 +1,7 @@
 "use client";
 
 import { Building2, LogOut, User } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -75,9 +76,9 @@ export function UserProfileMenu({
             <Building2 className="size-4" />
             {organizationName}
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
+          <DropdownMenuItem render={<Link href="/profile" />}>
             <User className="size-4" />
-            Profile settings
+            My profile
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

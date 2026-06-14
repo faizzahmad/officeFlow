@@ -30,6 +30,17 @@ export const employees = pgTable(
     designation: text("designation"),
     phone: text("phone"),
     address: text("address"),
+    city: text("city"),
+    state: text("state"),
+    postalCode: text("postal_code"),
+    dateOfBirth: date("date_of_birth"),
+    emergencyContactName: text("emergency_contact_name"),
+    emergencyContactPhone: text("emergency_contact_phone"),
+    emergencyContactRelation: text("emergency_contact_relation"),
+    bankName: text("bank_name"),
+    bankAccountHolderName: text("bank_account_holder_name"),
+    bankAccountNumber: text("bank_account_number"),
+    bankIfsc: text("bank_ifsc"),
     joiningDate: date("joining_date"),
     baseSalary: numeric("base_salary", { precision: 12, scale: 2 })
       .notNull()

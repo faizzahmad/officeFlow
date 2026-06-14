@@ -10,7 +10,9 @@ export type Permission =
   | "manageProjects"
   | "assignTasks"
   | "viewTeamAttendance"
-  | "viewReports";
+  | "viewReports"
+  | "viewEmployeeRecords"
+  | "manageOrganization";
 
 const permissionMap: Record<Permission, MemberRole[]> = {
   manageEmployees: ["admin", "hr"],
@@ -23,6 +25,8 @@ const permissionMap: Record<Permission, MemberRole[]> = {
   assignTasks: ["admin", "hr", "manager"],
   viewTeamAttendance: ["admin", "hr", "manager"],
   viewReports: ["admin", "hr", "manager"],
+  viewEmployeeRecords: ["admin", "hr"],
+  manageOrganization: ["admin"],
 };
 
 const routeAccess: Record<string, MemberRole[]> = {
@@ -30,6 +34,7 @@ const routeAccess: Record<string, MemberRole[]> = {
   "/reports": ["admin", "hr", "manager"],
   "/notifications": ["admin", "hr", "manager", "employee"],
   "/employees": ["admin", "hr"],
+  "/employee-records": ["admin", "hr"],
   "/departments": ["admin", "hr"],
   "/attendance": ["admin", "hr", "manager", "employee"],
   "/leave": ["admin", "hr", "manager", "employee"],
@@ -37,6 +42,8 @@ const routeAccess: Record<string, MemberRole[]> = {
   "/tasks": ["admin", "hr", "manager", "employee"],
   "/projects": ["admin", "hr", "manager"],
   "/performance": ["admin", "hr", "manager", "employee"],
+  "/profile": ["admin", "hr", "manager", "employee"],
+  "/settings": ["admin"],
 };
 
 export function hasPermission(role: MemberRole, permission: Permission): boolean {
@@ -44,5 +51,15 @@ export function hasPermission(role: MemberRole, permission: Permission): boolean
 }
 
 export function canAccessRoute(role: MemberRole, href: string): boolean {
-  return routeAccess[href]?.includes(role) ?? false;
+  if (routeAccess[href]?.includes(role)) return true;
+
+  if (href.startsWith("/employee-records/")) {
+    return routeAccess["/employee-records"]?.includes(role) ?? false;
+  }
+
+  if (href.startsWith("/payroll/payslips/")) {
+    return routeAccess["/payroll"]?.includes(role) ?? false;
+  }
+
+  return false;
 }

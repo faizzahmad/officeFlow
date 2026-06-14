@@ -1,5 +1,6 @@
 import { createEmployee, getDepartments, getEmployees } from "@/actions/employees";
 import { ActionForm } from "@/components/action-form";
+import { EmployeesTable } from "@/components/employees/employees-table";
 import { PageHeader } from "@/components/page-header";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
@@ -19,17 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { RoleGate } from "@/components/role-gate";
 import { MEMBER_ROLE_OPTIONS } from "@/lib/select-options";
-import { formatCurrency } from "@/lib/payroll";
 import { requirePermission } from "@/lib/session";
 
 export default async function EmployeesPage() {
@@ -121,34 +113,7 @@ export default async function EmployeesPage() {
         </RoleGate>
       </PageHeader>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Code</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Designation</TableHead>
-            <TableHead>Salary</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {employees.map((row) => (
-            <TableRow key={row.employee.id}>
-              <TableCell>{row.employee.employeeCode}</TableCell>
-              <TableCell>{row.userName}</TableCell>
-              <TableCell>{row.userEmail}</TableCell>
-              <TableCell className="capitalize">{row.memberRole}</TableCell>
-              <TableCell>{row.departmentName ?? "—"}</TableCell>
-              <TableCell>{row.employee.designation ?? "—"}</TableCell>
-              <TableCell>
-                {formatCurrency(row.employee.baseSalary)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <EmployeesTable data={employees} />
     </div>
   );
 }

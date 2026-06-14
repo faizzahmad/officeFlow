@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin } from "lucide-react";
+import { LogIn, LogOut, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -61,12 +61,13 @@ export function AttendanceActions({
   }
 
   return (
-    <div className="flex flex-col items-end gap-2">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[240px]">
+      <div className="grid gap-2 sm:grid-cols-1">
         <LoadingButton
           loading={checkInLoading}
           loadingText="Checking in..."
           disabled={!status.canCheckIn || checkOutLoading}
+          className="w-full"
           onClick={async () => {
             setCheckInLoading(true);
             try {
@@ -86,14 +87,15 @@ export function AttendanceActions({
             }
           }}
         >
-          <MapPin className="size-4" />
-          Check in with location
+          <LogIn className="size-4" />
+          Check in
         </LoadingButton>
         <LoadingButton
           variant="outline"
           loading={checkOutLoading}
           loadingText="Checking out..."
           disabled={!status.canCheckOut || checkInLoading}
+          className="w-full"
           onClick={async () => {
             setCheckOutLoading(true);
             try {
@@ -107,27 +109,30 @@ export function AttendanceActions({
             }
           }}
         >
+          <LogOut className="size-4" />
           Check out
         </LoadingButton>
       </div>
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Badge variant="secondary" className="text-xs">
+
+      <div className="space-y-2">
+        <Badge variant="secondary" className="w-full justify-center text-xs">
           {status.remainingCheckIns === 0
-            ? "No check-ins left today"
-            : `${status.remainingCheckIns} of ${MAX_DAILY_CHECK_INS} check-ins left today`}
+            ? "Daily check-in limit reached"
+            : `${status.remainingCheckIns} of ${MAX_DAILY_CHECK_INS} check-ins remaining`}
         </Badge>
         {location ? (
-          <Badge variant="outline" className="font-mono text-xs">
-            {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+          <Badge variant="outline" className="w-full justify-center font-mono text-xs">
+            <MapPin className="size-3" />
+            Location captured
           </Badge>
         ) : (
           <button
             type="button"
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
             onClick={() => void captureLocation()}
             disabled={locating}
           >
-            {locating ? "Getting location..." : "Preview location"}
+            {locating ? "Getting location..." : "Preview location before check-in"}
           </button>
         )}
       </div>

@@ -1,19 +1,11 @@
 import { getEmployees } from "@/actions/employees";
 import { getPayrollRuns, getPayslips } from "@/actions/payroll";
-import { DownloadPayslipButton } from "@/components/download-payslip-button";
 import { PageHeader } from "@/components/page-header";
 import { GeneratePayrollForm } from "@/components/payroll/generate-payroll-form";
+import { PayrollRunsTable } from "@/components/payroll/payroll-runs-table";
+import { PayslipsTable } from "@/components/payroll/payslips-table";
 import { RoleGate } from "@/components/role-gate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatCurrency } from "@/lib/payroll";
 import { getRolePermissions, requireWorkspace } from "@/lib/session";
 
 export default async function PayrollPage() {
@@ -67,24 +59,7 @@ export default async function PayrollPage() {
               <CardTitle>Payroll runs</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Period</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {runs.map((run) => (
-                    <TableRow key={run.id}>
-                      <TableCell>
-                        {run.month}/{run.year}
-                      </TableCell>
-                      <TableCell className="capitalize">{run.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <PayrollRunsTable data={runs} />
             </CardContent>
           </Card>
         </RoleGate>
@@ -94,45 +69,10 @@ export default async function PayrollPage() {
             <CardTitle>Salary slips</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Slip</TableHead>
-                  {permissions.canViewAllPayslips ? (
-                    <TableHead>Employee</TableHead>
-                  ) : null}
-                  <TableHead>Net salary</TableHead>
-                  <TableHead>Download</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payslips.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={permissions.canViewAllPayslips ? 4 : 3}
-                      className="text-center text-muted-foreground"
-                    >
-                      No salary slips yet.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  payslips.map((row) => (
-                    <TableRow key={row.payslip.id}>
-                      <TableCell>{row.payslip.slipNumber}</TableCell>
-                      {permissions.canViewAllPayslips ? (
-                        <TableCell>{row.userName}</TableCell>
-                      ) : null}
-                      <TableCell>
-                        {formatCurrency(row.payslip.netSalary)}
-                      </TableCell>
-                      <TableCell>
-                        <DownloadPayslipButton payslipId={row.payslip.id} />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <PayslipsTable
+              data={payslips}
+              showEmployee={permissions.canViewAllPayslips}
+            />
           </CardContent>
         </Card>
       </div>

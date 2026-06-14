@@ -179,3 +179,68 @@ export const attendanceStatusLabel: Record<AttendanceRecord["status"], string> =
     half_day: "Half day",
     absent: "Absent",
   };
+
+export const attendanceStatusStyles: Record<
+  AttendanceRecord["status"],
+  string
+> = {
+  present:
+    "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  late: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  half_day:
+    "border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300",
+  absent: "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300",
+};
+
+export const attendanceCalendarDayStyles: Record<
+  AttendanceRecord["status"],
+  string
+> = {
+  present:
+    "bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/20 dark:text-emerald-300",
+  late: "bg-amber-500/15 text-amber-800 hover:bg-amber-500/20 dark:text-amber-300",
+  half_day:
+    "bg-orange-500/15 text-orange-800 hover:bg-orange-500/20 dark:text-orange-300",
+  absent: "bg-red-500/15 text-red-800 hover:bg-red-500/20 dark:text-red-300",
+};
+
+export function formatAttendanceDate(dateStr: string): string {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function formatAttendanceTime(value: Date | string | null): string {
+  if (!value) return "—";
+  const date = value instanceof Date ? value : new Date(value);
+  return date.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+export function formatAttendancePeriod(filters: AttendanceFilters): string {
+  if (filters.startDate && filters.endDate) {
+    return `${formatAttendanceDate(filters.startDate)} – ${formatAttendanceDate(filters.endDate)}`;
+  }
+
+  const monthLabel = new Date(
+    filters.year,
+    filters.month - 1,
+    1,
+  ).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+
+  return monthLabel;
+}
+
+export function getAttendanceMapLink(
+  latitude: string | null,
+  longitude: string | null,
+): string | null {
+  if (!latitude || !longitude) return null;
+  return `https://www.google.com/maps?q=${latitude},${longitude}`;
+}

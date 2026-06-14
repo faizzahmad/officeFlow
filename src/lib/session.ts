@@ -80,6 +80,8 @@ export function getRolePermissions(role: MemberRole) {
     canAssignTasks: hasPermission(role, "assignTasks"),
     canViewTeamAttendance: hasPermission(role, "viewTeamAttendance"),
     canViewReports: hasPermission(role, "viewReports"),
+    canViewEmployeeRecords: hasPermission(role, "viewEmployeeRecords"),
+    canManageOrganization: hasPermission(role, "manageOrganization"),
   };
 }
 

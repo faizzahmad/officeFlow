@@ -6,9 +6,12 @@ import {
   CalendarDays,
   ClipboardList,
   Clock,
+  Contact,
   DollarSign,
   LayoutDashboard,
+  Settings,
   Target,
+  UserCircle,
   Users,
 } from "lucide-react";
 
@@ -24,10 +27,18 @@ export const navGroups = [
   {
     label: "People",
     items: [
+      { title: "My profile", href: "/profile", icon: UserCircle },
+      { title: "Employee records", href: "/employee-records", icon: Contact },
       { title: "Employees", href: "/employees", icon: Users },
       { title: "Departments", href: "/departments", icon: Building2 },
       { title: "Attendance", href: "/attendance", icon: Clock },
       { title: "Leave", href: "/leave", icon: CalendarDays },
+    ],
+  },
+  {
+    label: "Administration",
+    items: [
+      { title: "Organization settings", href: "/settings", icon: Settings },
     ],
   },
   {

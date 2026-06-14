@@ -7,21 +7,17 @@ import {
   getAttendanceSummary,
   getTodayAttendanceStatus,
 } from "@/actions/attendance";
-import { AttendanceActions } from "@/components/attendance-actions";
 import { AttendanceCalendar } from "@/components/attendance/attendance-calendar";
 import { AttendanceFilters } from "@/components/attendance/attendance-filters";
+import { AttendanceSessionLog } from "@/components/attendance/attendance-session-log";
+import { AttendanceTodayCard } from "@/components/attendance/attendance-today-card";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatWorkHours, parseAttendanceFilters } from "@/lib/attendance";
+  formatAttendancePeriod,
+  parseAttendanceFilters,
+} from "@/lib/attendance";
 import { getRolePermissions, requireWorkspace } from "@/lib/session";
 
 export default async function AttendancePage({
@@ -45,6 +41,8 @@ export default async function AttendancePage({
   const teamView =
     permissions.canViewTeamAttendance &&
     (!filters.employeeId || filters.employeeId === "all");
+
+  const periodLabel = formatAttendancePeriod(filters);
 
   const [records, summary, todayStatus, calendarData, filterEmployees] =
     await Promise.all([
@@ -71,12 +69,12 @@ export default async function AttendancePage({
         title="Attendance"
         description={
           permissions.canViewTeamAttendance
-            ? "Filter by employee and date, view calendar hours, and browse session logs."
-            : "Check in with your location and track your work hours on the calendar."
+            ? "Monitor team presence, review time entries, and track monthly attendance trends."
+            : "Check in for the day, review your hours, and track attendance over time."
         }
-      >
-        {todayStatus ? <AttendanceActions status={todayStatus} /> : null}
-      </PageHeader>
+      />
+
+      {todayStatus ? <AttendanceTodayCard status={todayStatus} /> : null}
 
       <Suspense
         fallback={
@@ -98,105 +96,56 @@ export default async function AttendancePage({
         />
       </Suspense>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title={permissions.canViewTeamAttendance ? "Present" : "My present days"}
+          title={permissions.canViewTeamAttendance ? "Present days" : "My present days"}
           value={summaryMap.present ?? 0}
+          hint={periodLabel}
+          accent="brand"
         />
         <StatCard
-          title={permissions.canViewTeamAttendance ? "Late" : "My late days"}
+          title={permissions.canViewTeamAttendance ? "Late arrivals" : "My late days"}
           value={summaryMap.late ?? 0}
+          hint={periodLabel}
         />
         <StatCard
-          title={permissions.canViewTeamAttendance ? "Half day" : "My half days"}
+          title={permissions.canViewTeamAttendance ? "Half days" : "My half days"}
           value={summaryMap.half_day ?? 0}
+          hint={periodLabel}
+          accent="secondary"
         />
         <StatCard
-          title={permissions.canViewTeamAttendance ? "Absent" : "My absent days"}
+          title={permissions.canViewTeamAttendance ? "Absences" : "My absences"}
           value={summaryMap.absent ?? 0}
+          hint={periodLabel}
         />
       </div>
 
-      <Suspense
-        fallback={
-          <Card>
-            <CardContent className="py-8 text-center text-sm text-muted-foreground">
-              Loading calendar...
-            </CardContent>
-          </Card>
-        }
-      >
-        <AttendanceCalendar
-          calendarData={calendarData}
-          month={filters.month}
-          year={filters.year}
-          teamView={teamView}
-          selectedEmployeeName={selectedEmployee?.name}
-        />
-      </Suspense>
+      <div className="grid gap-6 xl:grid-cols-[minmax(320px,420px)_1fr]">
+        <Suspense
+          fallback={
+            <Card>
+              <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                Loading calendar...
+              </CardContent>
+            </Card>
+          }
+        >
+          <AttendanceCalendar
+            calendarData={calendarData}
+            month={filters.month}
+            year={filters.year}
+            teamView={teamView}
+            selectedEmployeeName={selectedEmployee?.name}
+          />
+        </Suspense>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Session log</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                {permissions.canViewTeamAttendance ? (
-                  <TableHead>Employee</TableHead>
-                ) : null}
-                <TableHead>Check in</TableHead>
-                <TableHead>Check out</TableHead>
-                <TableHead>Hours</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {records.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={permissions.canViewTeamAttendance ? 7 : 6}
-                    className="text-center text-muted-foreground"
-                  >
-                    No attendance records for this filter.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                records.map((row) => (
-                  <TableRow key={row.record.id}>
-                    <TableCell>{row.record.date}</TableCell>
-                    {permissions.canViewTeamAttendance ? (
-                      <TableCell>
-                        {row.userName} ({row.employeeCode})
-                      </TableCell>
-                    ) : null}
-                    <TableCell>
-                      {row.record.checkIn
-                        ? new Date(row.record.checkIn).toLocaleTimeString()
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {row.record.checkOut
-                        ? new Date(row.record.checkOut).toLocaleTimeString()
-                        : "—"}
-                    </TableCell>
-                    <TableCell>{formatWorkHours(row.record.workHours)}</TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      {row.record.checkInLatitude && row.record.checkInLongitude
-                        ? `${Number(row.record.checkInLatitude).toFixed(4)}, ${Number(row.record.checkInLongitude).toFixed(4)}`
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="capitalize">{row.record.status}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+        <AttendanceSessionLog
+          records={records}
+          showEmployee={permissions.canViewTeamAttendance}
+          periodLabel={periodLabel}
+        />
+      </div>
     </div>
   );
 }

@@ -3,10 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
-import { Badge } from "@/components/ui/badge";
+import { AttendanceStatusBadge } from "@/components/attendance/attendance-status-badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  attendanceCalendarDayStyles,
   attendanceStatusLabel,
   type AttendanceCalendarDay,
 } from "@/lib/attendance";
@@ -18,15 +19,6 @@ function toDateKey(date: Date): string {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
-
-const statusStyles = {
-  present:
-    "bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/20 dark:text-emerald-300",
-  late: "bg-amber-500/15 text-amber-800 hover:bg-amber-500/20 dark:text-amber-300",
-  half_day:
-    "bg-orange-500/15 text-orange-800 hover:bg-orange-500/20 dark:text-orange-300",
-  absent: "bg-red-500/15 text-red-800 hover:bg-red-500/20 dark:text-red-300",
-} as const;
 
 export function AttendanceCalendar({
   calendarData,
@@ -46,6 +38,9 @@ export function AttendanceCalendar({
   const [pending, startTransition] = useTransition();
 
   const displayMonth = new Date(year, month - 1, 1);
+  const monthDays = Object.values(calendarData);
+  const totalHours = monthDays.reduce((sum, day) => sum + day.totalHours, 0);
+  const daysWithData = monthDays.length;
 
   function onMonthChange(next: Date) {
     const nextParams = new URLSearchParams(searchParams.toString());
@@ -58,51 +53,73 @@ export function AttendanceCalendar({
     });
   }
 
+  function dayLabel(data: AttendanceCalendarDay) {
+    if (teamView) {
+      return `${data.presentCount} present`;
+    }
+
+    if (data.totalHours > 0) {
+      return `${data.totalHours.toFixed(1)}h`;
+    }
+
+    return attendanceStatusLabel[data.status ?? "present"];
+  }
+
   return (
-    <Card className={cn(pending && "opacity-70")}>
-      <CardHeader className="pb-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+    <Card className={cn("h-full", pending && "opacity-70")}>
+      <CardHeader className="space-y-3 pb-3">
+        <div>
+          <CardTitle className="text-base">Calendar overview</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {teamView
+              ? "Daily team attendance at a glance"
+              : selectedEmployeeName
+                ? `${selectedEmployeeName}'s attendance`
+                : "Your daily attendance"}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 rounded-lg border bg-muted/30 p-3 text-sm">
           <div>
-            <CardTitle className="text-base">Attendance calendar</CardTitle>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {teamView
-                ? "Team view — present count and total hours per day"
-                : selectedEmployeeName
-                  ? `${selectedEmployeeName} — hours and status per day`
-                  : "Your hours and status per day"}
-            </p>
+            <p className="text-xs text-muted-foreground">Days tracked</p>
+            <p className="font-medium">{daysWithData}</p>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {(Object.keys(statusStyles) as Array<keyof typeof statusStyles>).map(
-              (status) => (
-                <Badge
-                  key={status}
-                  variant="outline"
-                  className={cn("text-[10px] font-normal", statusStyles[status])}
-                >
-                  {attendanceStatusLabel[status]}
-                </Badge>
-              ),
-            )}
+          <div>
+            <p className="text-xs text-muted-foreground">Total hours</p>
+            <p className="font-medium">{totalHours.toFixed(1)}h</p>
           </div>
         </div>
+
+        <div className="flex flex-wrap gap-1.5">
+          {(
+            Object.keys(attendanceCalendarDayStyles) as Array<
+              keyof typeof attendanceCalendarDayStyles
+            >
+          ).map((status) => (
+            <AttendanceStatusBadge
+              key={status}
+              status={status}
+              className="text-[11px]"
+            />
+          ))}
+        </div>
       </CardHeader>
-      <CardContent className="flex justify-center overflow-x-auto">
+      <CardContent className="flex justify-center overflow-x-auto pb-6">
         <Calendar
           mode="single"
           month={displayMonth}
           onMonthChange={onMonthChange}
-          className="w-full max-w-md"
+          className="w-full"
           classNames={{
             month: "w-full",
-            day: "h-14 w-full",
+            day: "h-16 w-full",
           }}
           components={{
             DayButton: ({ day, modifiers, className, ...props }) => {
               const key = toDateKey(day.date);
               const data = calendarData[key];
               const statusClass = data?.status
-                ? statusStyles[data.status]
+                ? attendanceCalendarDayStyles[data.status]
                 : "";
 
               return (
@@ -110,23 +127,19 @@ export function AttendanceCalendar({
                   type="button"
                   {...props}
                   className={cn(
-                    "flex h-14 w-full flex-col items-center justify-center gap-0.5 rounded-lg border border-transparent p-1 text-xs transition-colors",
+                    "flex h-16 w-full flex-col items-center justify-center gap-1 rounded-lg border border-transparent p-1 text-xs transition-colors",
                     modifiers.outside && "opacity-40",
-                    modifiers.today && "border-primary/40",
+                    modifiers.today && "ring-2 ring-primary/30",
                     statusClass,
                     className,
                   )}
                 >
-                  <span className="text-sm font-medium leading-none">
+                  <span className="text-sm font-semibold leading-none">
                     {day.date.getDate()}
                   </span>
                   {data ? (
-                    <span className="max-w-full truncate text-[10px] leading-tight opacity-90">
-                      {teamView
-                        ? `${data.presentCount} · ${data.totalHours.toFixed(1)}h`
-                        : data.totalHours > 0
-                          ? `${data.totalHours.toFixed(1)}h`
-                          : "Present"}
+                    <span className="max-w-full truncate px-0.5 text-[10px] leading-tight opacity-90">
+                      {dayLabel(data)}
                     </span>
                   ) : null}
                 </button>

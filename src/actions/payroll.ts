@@ -6,7 +6,9 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import {
   attendanceRecords,
+  departments,
   employees,
+  organizations,
   payrollRuns,
   payslips,
   user,
@@ -23,6 +25,7 @@ import {
   calculateNetSalary,
   generateSlipNumber,
 } from "@/lib/payroll";
+import { formatPayslipPeriod, type PayslipViewData } from "@/lib/payslip";
 import { hasPermission } from "@/lib/permissions";
 import { revalidateNotificationViews } from "@/lib/revalidate-notifications";
 import { requireWorkspace } from "@/lib/session";
@@ -117,6 +120,94 @@ export async function getPayslips(payrollRunId?: string) {
     .innerJoin(user, eq(employees.userId, user.id))
     .where(and(...conditions))
     .orderBy(desc(payslips.createdAt));
+}
+
+export async function getPayslipById(
+  payslipId: string,
+): Promise<PayslipViewData | null> {
+  const { organization, member, employee } = await requireWorkspace();
+
+  const [row] = await db
+    .select({
+      payslip: payslips,
+      employeeCode: employees.employeeCode,
+      employeeId: employees.id,
+      designation: employees.designation,
+      bankName: employees.bankName,
+      bankAccountHolderName: employees.bankAccountHolderName,
+      bankAccountNumber: employees.bankAccountNumber,
+      bankIfsc: employees.bankIfsc,
+      userName: user.name,
+      departmentName: departments.name,
+      organizationName: organizations.name,
+      organizationLogoUrl: organizations.logoUrl,
+      organizationContactEmail: organizations.contactEmail,
+      organizationContactPhone: organizations.contactPhone,
+      organizationWebsite: organizations.website,
+      organizationAddress: organizations.address,
+      month: payrollRuns.month,
+      year: payrollRuns.year,
+    })
+    .from(payslips)
+    .innerJoin(employees, eq(payslips.employeeId, employees.id))
+    .innerJoin(user, eq(employees.userId, user.id))
+    .innerJoin(organizations, eq(payslips.organizationId, organizations.id))
+    .innerJoin(payrollRuns, eq(payslips.payrollRunId, payrollRuns.id))
+    .leftJoin(departments, eq(employees.departmentId, departments.id))
+    .where(
+      and(
+        eq(payslips.id, payslipId),
+        eq(payslips.organizationId, organization.id),
+      ),
+    )
+    .limit(1);
+
+  if (!row) return null;
+
+  const canViewAll = hasPermission(member.role, "viewAllPayslips");
+  const isOwnSlip = employee?.id === row.employeeId;
+  if (!canViewAll && !isOwnSlip) return null;
+
+  return {
+    slipNumber: row.payslip.slipNumber,
+    periodLabel: formatPayslipPeriod(row.month, row.year),
+    generatedAt: new Date(row.payslip.createdAt).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
+    organization: {
+      name: row.organizationName,
+      logoUrl: row.organizationLogoUrl,
+      contactEmail: row.organizationContactEmail,
+      contactPhone: row.organizationContactPhone,
+      website: row.organizationWebsite,
+      address: row.organizationAddress,
+    },
+    employee: {
+      name: row.userName,
+      code: row.employeeCode,
+      department: row.departmentName,
+      designation: row.designation,
+    },
+    bank: {
+      bankName: row.bankName,
+      accountHolderName: row.bankAccountHolderName,
+      accountNumber: row.bankAccountNumber,
+      ifsc: row.bankIfsc,
+    },
+    earnings: {
+      baseSalary: row.payslip.baseSalary,
+      bonus: row.payslip.bonus,
+      incentives: row.payslip.incentives,
+    },
+    deductions: {
+      leaveDeduction: row.payslip.leaveDeduction,
+      lateDeduction: row.payslip.lateDeduction,
+      otherDeductions: row.payslip.otherDeductions,
+    },
+    netSalary: row.payslip.netSalary,
+  };
 }
 
 export async function generatePayroll(

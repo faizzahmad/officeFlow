@@ -6,6 +6,8 @@ import {
 } from "@/actions/performance";
 import { getEmployees } from "@/actions/employees";
 import { ActionForm } from "@/components/action-form";
+import { DailyReportsTable } from "@/components/performance/daily-reports-table";
+import { PerformanceReviewsTable } from "@/components/performance/performance-reviews-table";
 import { PageHeader } from "@/components/page-header";
 import { SubmitButton } from "@/components/submit-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,14 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { RoleGate } from "@/components/role-gate";
 import { getRolePermissions, requireWorkspace } from "@/lib/session";
@@ -145,24 +139,7 @@ export default async function PerformancePage() {
             <CardTitle>Daily reports</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Summary</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reports.map((row) => (
-                  <TableRow key={row.report.id}>
-                    <TableCell>{row.report.date}</TableCell>
-                    <TableCell>{row.userName}</TableCell>
-                    <TableCell>{row.report.summary}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DailyReportsTable data={reports} />
           </CardContent>
         </Card>
 
@@ -171,24 +148,7 @@ export default async function PerformancePage() {
             <CardTitle>Performance reviews</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Period</TableHead>
-                  <TableHead>Score</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reviews.map((row) => (
-                  <TableRow key={row.review.id}>
-                    <TableCell>{row.userName}</TableCell>
-                    <TableCell>{row.review.period}</TableCell>
-                    <TableCell>{row.review.score}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <PerformanceReviewsTable data={reviews} />
           </CardContent>
         </Card>
       </div>

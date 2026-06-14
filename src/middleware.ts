@@ -7,7 +7,8 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublic =
     publicPaths.includes(pathname) ||
-    pathname.startsWith("/api/auth");
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/uploadthing");
 
   if (isPublic) {
     return NextResponse.next();

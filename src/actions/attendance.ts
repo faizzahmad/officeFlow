@@ -34,6 +34,8 @@ export type TodayAttendanceStatus = {
   remainingCheckIns: number;
   canCheckIn: boolean;
   canCheckOut: boolean;
+  openCheckIn: Date | null;
+  todayTotalHours: number;
 };
 
 function buildAttendanceConditions(
@@ -104,15 +106,23 @@ export async function getTodayAttendanceStatus(): Promise<TodayAttendanceStatus 
     );
 
   const checkInCount = todayRecords.length;
-  const hasOpenSession = todayRecords.some(
+  const openSession = todayRecords.find(
     (record) => record.checkIn && !record.checkOut,
   );
+  const hasOpenSession = Boolean(openSession);
+
+  const todayTotalHours = todayRecords.reduce((total, record) => {
+    if (!record.checkIn || !record.checkOut) return total;
+    return total + calculateWorkHours(record.checkIn, record.checkOut);
+  }, 0);
 
   return {
     checkInCount,
     remainingCheckIns: Math.max(0, MAX_DAILY_CHECK_INS - checkInCount),
     canCheckIn: !hasOpenSession && checkInCount < MAX_DAILY_CHECK_INS,
     canCheckOut: hasOpenSession,
+    openCheckIn: openSession?.checkIn ?? null,
+    todayTotalHours: Math.round(todayTotalHours * 100) / 100,
   };
 }
 
