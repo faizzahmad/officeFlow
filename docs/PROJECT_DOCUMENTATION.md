@@ -7,21 +7,22 @@
 
 **Submitted in partial fulfillment of the requirements for the award of**
 
-**[Degree Name — Bachelor of  Computer Application]**
+**Bachelor of Computer Applications (BCA)**
 
 **Submitted by:**
 
 | | |
 |---|---|
-| **Student Name** | _________________________ |
-| **Roll Number** | _________________________ |
-| **Department** | _________________________ |
-| **College Name** | _________________________ |
-| **Academic Year** | 2025–2026 |
+| **Student Name** | Mohammad Jawed Alam |
+| **Registration No.** | 23303316016 |
+| **College Roll No.** | 034 |
+| **Department / Stream** | BCA |
+| **College Name** | Impact College Patna |
+| **Academic Session** | 2023–26 |
 
 **Under the guidance of:**
 
-**[Guide Name]**  
+**Mr. Lokanath Mahanta**  
 Designation, Department
 
 ---
@@ -30,7 +31,7 @@ Designation, Department
 
 ## CERTIFICATE
 
-This is to certify that the project report entitled **"Office Flow — All-in-One Office CRM & HRMS System"** submitted by **[Student Name]** (Roll No: **[Roll Number]**) in partial fulfillment of the requirements for the award of **[Degree]** is a record of bonafide work carried out under my supervision and guidance.
+This is to certify that the project report entitled **"Office Flow — All-in-One Office CRM & HRMS System"** submitted by **Mohammad Jawed Alam** (Registration No: **23303316016**, College Roll No: **034**) in partial fulfillment of the requirements for the award of **Bachelor of Computer Applications (BCA)** is a record of bonafide work carried out under my supervision and guidance.
 
 The matter embodied in this report has not been submitted earlier for the award of any other degree or diploma to the best of my knowledge.
 
@@ -53,7 +54,7 @@ Name & Signature
 
 ## DECLARATION
 
-I, **[Student Name]**, Roll Number **[Roll Number]**, student of **[Department]**, **[College Name]**, hereby declare that the project report entitled **"Office Flow — All-in-One Office CRM & HRMS System"** submitted by me to **[University Name]** is a record of original work done by me under the guidance of **[Guide Name]**.
+I, **Mohammad Jawed Alam**, Registration Number **23303316016**, College Roll Number **034**, student of **BCA**, **Impact College Patna**, hereby declare that the project report entitled **"Office Flow — All-in-One Office CRM & HRMS System"** submitted by me is a record of original work done by me under the guidance of **Mr. Lokanath Mahanta**.
 
 This work has not been submitted elsewhere for any other degree or diploma. All sources of information have been duly acknowledged.
 
@@ -72,7 +73,7 @@ This work has not been submitted elsewhere for any other degree or diploma. All 
 
 I would like to express my sincere gratitude to all those who contributed to the successful completion of this project.
 
-First and foremost, I extend my heartfelt thanks to my project guide, **[Guide Name]**, for their invaluable guidance, continuous support, and constructive feedback throughout the development of Office Flow. Their expertise and encouragement helped me overcome technical challenges and maintain focus on delivering a complete, working system.
+First and foremost, I extend my heartfelt thanks to my project guide, **Mr. Lokanath Mahanta**, for their invaluable guidance, continuous support, and constructive feedback throughout the development of Office Flow. Their expertise and encouragement helped me overcome technical challenges and maintain focus on delivering a complete, working system.
 
 I am deeply grateful to the Head of the Department, **[HOD Name]**, and all faculty members of the **[Department]** department for providing the academic environment and resources necessary for this project.
 
